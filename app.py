@@ -60,7 +60,7 @@ def submit():
     st.session_state.query = ''
 
 
-st.title("🍕 Papa Johns Pizza Assistant 🍕")
+st.title("Fyx Content Assistant")
 
 st.text_input("Play with me:", key='query', on_change=submit)
 
