@@ -4,8 +4,8 @@ import time
 from openai import OpenAI
 
 # Set your OpenAI API key and assistant ID here
-api_key         = st.secrets["openai_apikey"]
-assistant_id    = st.secrets["assistant_id"]
+api_key         = st.secrets["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"]
+assistant_id    = st.secrets["asst_ZOgTkWF7yOlZ3JZ7GJtUDtFM"]
 
 # Set openAi client , assistantp ai and assistant ai thread
 @st.cache_resource
@@ -70,6 +70,6 @@ st.write("You entered: ", user_input)
 
 if user_input:
     result = get_assistant_response(user_input)
-    st.header('Assistant :blue[cool] :pizza:', divider='rainbow')
+    st.header('Assistant: blue[cool] :pizza:', divider='rainbow')
     st.text(result)
 
