@@ -26,15 +26,15 @@ def load_groq_client():
     api_key=groq_key,
     )
 
-    client.chat.completions.create(
-        messages=[
-            {
-                "role": "system",
-                "content": "You are Fyx",
-            }
-        ],
-        model="mixtral-8x7b-32768",
-    )
+    # client.chat.completions.create(
+    #     messages=[
+    #         {
+    #             "role": "system",
+    #             "content": "You are Fyx",
+    #         }
+    #     ],
+    #     model="mixtral-8x7b-32768",
+    # )
 
     return client
 
@@ -86,7 +86,7 @@ def get_openai_response(messages):
     history = history_to_assistant_messages(messages)
     
     response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4-turbo-preview",
         messages=history
     )
 
@@ -94,6 +94,10 @@ def get_openai_response(messages):
 
 def history_to_assistant_messages(history):
     messages = []
+
+    with open('prompt.txt', 'r') as file:
+        prompt = file.read()
+    messages.append({"role": "system", "content": prompt})
     for message in history:
         if message.startswith("You: "):
             messages.append({"role": "user", "content": message[5:]})
@@ -140,7 +144,6 @@ def main():
 
     st.text_area("Fyx yourself a Linkedin post, a blog or whatever you like", value="", key='query')
 
-    # Initialize or reset the button click state
     if 'run_button' in st.session_state and st.session_state.run_button == True:
         st.session_state.running = True
     else:
@@ -149,10 +152,14 @@ def main():
     if 'output' not in st.session_state:
         st.session_state.output = ""
 
-    col_1, col_2 = st.columns(2)
+    # Initialize model_selector and selectbox_option if not already in session state
+    if 'model_selector' not in st.session_state:
+        st.session_state.model_selector = "ChatGPT"
+        st.session_state.selectbox_option = 0  # Default to the first option
 
-    with col1:
+    col_1, col_2 = st.columns([4,1])
 
+    with col_1:
         # Button to submit input
         if st.button("Send", disabled=st.session_state.running, key='run_button'):
             if st.session_state.query:
@@ -166,14 +173,17 @@ def main():
                 st.session_state.chat_history.append(f"Assistant: {result}")
                 st.session_state.reset_input = True
                 st.rerun()
+            else:
+                del st.session_state['run_button']
+                st.rerun()
 
-    with col2:
+    with col_2:
         if 'model_selector' not in st.session_state:
             st.session_state.model_selector = "ChatGPT"
 
         if 'selectbox_option' not in st.session_state:
             st.session_state.selectbox_option = 0
-
+        
         # Dropdown for selecting the model
         model_choice = st.selectbox("select assistant",
                       ["ChatGPT", "Groq"], 
