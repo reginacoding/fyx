@@ -16,6 +16,7 @@ def load_openai_client_and_assistant():
     my_assistant = client.beta.assistants.retrieve(assistant_id)
     thread = client.beta.threads.create()
 
+
     return client, my_assistant, thread
 
 client, my_assistant, assistant_thread = load_openai_client_and_assistant()
@@ -73,13 +74,42 @@ def main():
         st.markdown("**Emma, the Design Consultant**")
         st.markdown("Ready to add a visual? I'll write a prompt that complements your draft and includes all the right brand colors and style.")
 
-    user_input = st.text_area("Fyx yourself a Linkedin post, a blog or whatever you like", key='query')
+    st.markdown("---") 
 
-    if st.button("Send"):
-        if user_input:
-            result = get_assistant_response(user_input)
-            st.header('Assistant:')
-            st.write(result)
+    if 'chat_history' not in st.session_state:
+        st.session_state.chat_history = []
+
+    st.header('Chat:')
+    for message in st.session_state.chat_history:
+            st.markdown(f"<div style='background-color: #262730; padding: 10px; border-radius: 10px; margin: 10px 0;'>{message}</div>", unsafe_allow_html=True)
+
+    if 'reset_input' not in st.session_state:
+        st.session_state['reset_input'] = False
+    
+    if st.session_state.reset_input == True:
+        st.session_state['query'] = ""
+        st.session_state.reset_input = False
+
+    st.text_area("Fyx yourself a Linkedin post, a blog or whatever you like", value="", key='query')
+
+    if 'run_button' in st.session_state and st.session_state.run_button == True:
+        st.session_state.running = True
+    else:
+        st.session_state.running = False
+
+    
+    # Button to submit input
+    if st.button("Send", disabled=st.session_state.running, key='run_button'):
+        if st.session_state.query:
+            st.session_state.chat_history.append(f"You: {st.session_state.query}")
+            result = get_assistant_response(st.session_state.query)
+            # Display the response
+            st.session_state.chat_history.append(f"Assistant: {result}")
+            st.session_state.reset_input = True
+            st.rerun()
+        else:
+            del st.session_state['run_button']
+            st.rerun()
 
 if __name__ == "__main__":
     main()
